@@ -1,0 +1,522 @@
+Dim cod As String
+Dim pos As String
+Dim linha As Double
+Sub InserirFoto()
+
+    Dim t As Double, l As Double, w As Double, h As Double, altLinha As Double
+    
+    On Error GoTo ErrorHandler
+    
+    Application.ScreenUpdating = False
+    
+    With ActiveSheet.Pictures.Insert("C:\Propostas\Catalogo Di Solle\" + cod + ".jpg")
+        altLinha = .Height + 10
+        If (altLinha > 10) Then Rows(linha & ":" & linha).RowHeight = altLinha
+        .Left = ActiveSheet.Range(pos).Left + 2
+        .Top = ActiveSheet.Range(pos).Top '+ (linha * 0.255)
+        t = .Top
+        l = .Left
+        w = ActiveSheet.Range(pos).Offset(0, 1).Left - .Left
+        l = l + w / 2 - .Width / 2
+        If l < 1 Then l = 1
+        h = ActiveSheet.Range(pos).Offset(1, 0).Top - .Top
+        t = t + h / 2 - .Height / 2
+        If t < 1 Then t = 1
+        .Top = t
+        .Left = l
+    End With
+        
+    Application.ScreenUpdating = True
+
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "An error occurred: " & Err.Description & vbNewLine & _
+        "Error number: " & Err.Number & vbNewLine & _
+        "Error source: " & Err.Source & vbNewLine & _
+        "Error line: " & Erl, vbCritical, "Error"
+
+End Sub
+
+
+
+Sub executa()
+    
+    Dim i As Integer
+    Dim linhas As Integer
+    Dim zoom As Integer
+    Dim cod As String
+    Dim pos As String
+    
+    zoom = ActiveWindow.zoom
+    ActiveWindow.zoom = 70
+    
+    linhas = Range("D1").Value
+    i = 10
+
+    While (i < (10 + linhas))
+        cod = Range("C" & i).Value
+        pos = "B" & i
+        cod = Replace(cod, "/", "_")
+        linha = i
+        InsereFoto linha, pos, cod
+        i = i + 1
+    Wend
+
+    Range("B9").Select
+    ActiveWindow.zoom = zoom
+    
+End Sub
+
+
+Sub ColocaLogo()
+    
+    On Error GoTo Erro
+    Range("B2").Select
+    With ActiveSheet.Pictures.Insert("C:\Propostas\Catalogo Di Solle\logo.jpg")
+        .Left = ActiveSheet.Range("B2").Left + 2
+        .Top = ActiveSheet.Range("B2").Top - 2
+        .Height = 48.91
+        .Width = 142.21
+    End With
+    
+Erro:
+    Resume Next
+        
+End Sub
+
+
+Sub LimparFotos()
+    
+Dim s As String
+Dim pic As Picture
+Dim rng As Range
+
+Set ws = ActiveSheet
+Set rng = ws.Range("B10:B373")
+
+For Each pic In ActiveSheet.Pictures
+With pic
+s = .TopLeftCell.Address & ":" & .BottomRightCell.Address
+End With
+If Not Intersect(rng, ws.Range(s)) Is Nothing Then
+pic.Delete
+End If
+Next
+
+    Rows("010:373").Select
+    Selection.RowHeight = 20
+    Range("B10").Select
+        
+End Sub
+
+Sub Salvar()
+'
+
+'
+    On Error GoTo Erro
+    Dim titulo, consumo, icmsinterno, icmsinterest, icmspr, importados, referencia As String
+    Dim linha_inicial, linha_final, linha As Integer
+    
+    linha_inicial = Range("D1").Text
+    linha_final = Range("C1").Text
+    consumo = Sheets("Base Estados").Range("e2").Value
+    icmsinterno = Sheets("Base Estados").Range("g2").Value
+    icmsinterest = Sheets("Base Estados").Range("i2").Value
+    icmspr = Sheets("Base Estados").Range("g1").Value
+    importados = Sheets("Base Estados").Range("I1").Value
+    zfaliquota = Sheets("Base Estados").Range("J1").Value
+    zonafranca = Sheets("Base Estados").Range("K1").Value
+    titulo = Range("B1").Value
+    referencia = ActiveWorkbook.Name
+    
+    If Dir("C:\Propostas") = "" Then
+    MkDir "C:\Propostas"
+    End If
+    
+' Copia planilha
+    
+    Sheets("Proposta Padrão").Copy
+    
+    Application.ScreenUpdating = False
+
+' Remove links
+
+    ActiveSheet.Pictures.Delete
+    Rows("10:371").RowHeight = 33
+    Range("B9").Select
+    Range("C9").HorizontalAlignment = xlCenter
+    Range("F5:G5").Select
+    ActiveSheet.Shapes.Range(Array("Drop Down 1")).Select
+    With Selection
+        .ListFillRange = ""
+        .LinkedCell = ""
+        .Display3DShading = True
+    End With
+    ActiveSheet.Shapes.Range(Array("Drop Down 2")).Select
+    With Selection
+        .ListFillRange = ""
+        .LinkedCell = ""
+        .Display3DShading = True
+    End With
+    ActiveSheet.Shapes.Range(Array("Drop Down 3")).Select
+    With Selection
+        .ListFillRange = ""
+        .LinkedCell = ""
+        .Display3DShading = True
+    End With
+    With Selection.Validation
+        .Delete
+        .Add Type:=xlValidateInputOnly, AlertStyle:=xlValidAlertStop, Operator _
+        :=xlBetween
+        .IgnoreBlank = True
+        .InCellDropdown = True
+        .ShowInput = True
+        .ShowError = True
+    End With
+    Range("F7:G7").Select
+    With Selection.Validation
+        .Delete
+        .Add Type:=xlValidateInputOnly, AlertStyle:=xlValidAlertStop, Operator _
+        :=xlBetween
+        .IgnoreBlank = True
+        .InCellDropdown = True
+        .ShowInput = True
+        .ShowError = True
+        End With
+    Range("D6").Select
+    With Selection.Validation
+        .Delete
+        .Add Type:=xlValidateInputOnly, AlertStyle:=xlValidAlertStop, Operator _
+        :=xlBetween
+        .IgnoreBlank = True
+        .InCellDropdown = True
+        .ShowInput = True
+        .ShowError = True
+        End With
+    
+' Insere imagens fixas
+
+    Dim i, zoom As Integer
+    Dim t, l, w, h, altLinha As Double
+    
+    ActiveWindow.zoom = 70
+    
+    i = 10
+
+    While (i < (10 + linha_inicial))
+        cod = Range("C" & i).Value
+        pos = "B" & i
+        cod = Replace(cod, "/", "_")
+        linha = i
+    
+    With ActiveSheet.Pictures.Insert("C:\Propostas\Catalogo Di Solle\" + cod + ".jpg")
+        altLinha = .Height + 10
+        Range("A1").Value = .Height
+        If (altLinha > 10) Then Rows(linha & ":" & linha).RowHeight = altLinha
+        .Left = ActiveSheet.Range(pos).Left + 2
+        .Top = ActiveSheet.Range(pos).Top '+ (linha * 0.255)
+        t = .Top
+        l = .Left
+        w = ActiveSheet.Range(pos).Offset(0, 1).Left - .Left
+        l = l + w / 2 - .Width / 2
+        If l < 1 Then l = 1
+        h = ActiveSheet.Range(pos).Offset(1, 0).Top - .Top
+        t = t + h / 2 - .Height / 2
+        If t < 1 Then t = 1
+        .Top = 1
+        .Left = l
+        .Width = 1
+        .Height = 1
+        Application.ActiveSheet.Shapes.AddPicture "C:\Propostas\Catalogo Di Solle\" + cod + ".jpg", False, True, l, t, -1, -1
+    End With
+    
+        i = i + 1
+    Wend
+ 
+    Range("B9").Select
+    
+' Ajusta formatação e fórmulas
+
+    Columns("A:A").Copy
+    Columns("A:A").PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
+    
+    Columns("C:V").Copy
+    Columns("C:V").PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
+        
+    Columns("Y:Y").Copy
+    Columns("Y:Y").PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
+    
+    Columns("AA:AB").Copy
+    Columns("AA:AB").PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
+    
+    Columns("AH:AP").Copy
+    Columns("AH:AP").PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
+                
+    Range("C10").Select
+    Application.CutCopyMode = False
+    
+    Range("C1:E2").ClearContents
+    
+    Cells.Replace What:="'[" & referencia & "]Base Estados'!$E$2", Replacement:=consumo, LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+        
+    Cells.Replace What:="'[" & referencia & "]Base Estados'!$G$2", Replacement:=icmsinterno, LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+        
+    Cells.Replace What:="'[" & referencia & "]Base Estados'!$I$2", Replacement:=icmsinterest, LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+        
+    Cells.Replace What:="'[" & referencia & "]Base Estados'!$G$1", Replacement:=icmspr, LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+        
+    Cells.Replace What:="'[" & referencia & "]Base Estados'!$I$1", Replacement:=importados, LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+        
+    Cells.Replace What:="'[" & referencia & "]Base Estados'!J1", Replacement:=zfaliquota, LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    
+    Cells.Replace What:="'[" & referencia & "]Base Estados'!k1", Replacement:=zonafranca, LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+    
+        
+ '   If Range("F7").Text = "Sem ST" Then
+ '       Range("S6:V7").Cut
+ '       Range("X6").Select
+ '       Application.DisplayAlerts = False
+ '       ActiveSheet.Paste
+ '       Application.DisplayAlerts = True
+ '       Range("H4:I7").Select
+ '       Selection.Cut
+ '       Range("s4").Select
+ '       ActiveSheet.Paste
+ '       Range("S3").Select
+ '       Columns("H:R").Delete Shift:=xlToLeft
+ '       Columns("U:U").Delete Shift:=xlToLeft
+ '       Range("G" & linha_final & ":P" & linha_final + 7).Select
+ '       Range("P" & linha_final).Activate
+ '       Selection.Delete Shift:=xlToLeft
+ '       Range("G" & linha_final + 3 & ":L" & linha_final + 6).Select
+ '       Selection.Delete Shift:=xlUp
+ '       Range("G" & linha_final + 3).Select
+ '       ActiveCell.FormulaR1C1 = "VALOR TOTAL COM IPI"
+ '       Columns("M:U").Select
+ '       Selection.Delete Shift:=xlToLeft
+ '       Columns("M:M").Select
+ '       Selection.EntireColumn.Hidden = True
+ '   Else
+ '       If Range("c10").Text = "ZONA FRANCA" Then
+ '           Columns("g:O").Select
+ '           Selection.Delete Shift:=xlToLeft
+ '           Range("E" & linha_final & ":O" & linha_final + 7).Select
+ '           Range("E" & linha_final).Activate
+ '           Selection.Delete Shift:=xlToLeft
+ '           Range("E" & linha_final + 5 & ":L" & linha_final + 6).Select
+ '           Selection.Delete Shift:=xlUp
+ '           Columns("H:I").Select
+ '           Selection.Delete Shift:=xlToLeft
+ '           Columns("H:R").Select
+ '           Selection.EntireColumn.Hidden = False
+ '           Columns("I:R").Select
+ '           Selection.Delete Shift:=xlToLeft
+ '           Range("I15").Value = "VALOR TOTAL"
+ '           Range("h" & linha & ":h" & linha + 5).Select
+ '           Selection.Insert Shift:=xlToRight
+ '       Else
+            Range("S6:V7").Cut
+            Range("X6").Select
+            Application.DisplayAlerts = False
+            ActiveSheet.Paste
+            Application.DisplayAlerts = True
+            Range("H4:I7").Select
+            Selection.Cut
+            Range("s4").Select
+            ActiveSheet.Paste
+            Range("S3").Select
+            Columns("H:R").Delete Shift:=xlToLeft
+            Range("O6:P6").FormulaR1C1 = "=R[367]C[7]"
+            Range("O7:P7").FormulaR1C1 = "=COUNTA(R[3]C[-12]:R[364]C[-12])"
+
+'        End If
+'    End If
+    
+    If linha_inicial + 10 < linha_final Then
+        Rows(9 + linha_inicial + 1 & ":" & linha_final - 1).Select
+        Selection.Delete Shift:=xlUp
+    End If
+       
+        
+        ActiveWindow.ScrollRow = 1
+        ActiveWindow.ScrollColumn = 1
+        Range("B4").Select
+    
+        
+' Salva planilha
+        
+        Application.ScreenUpdating = True
+        
+        ActiveWorkbook.SaveAs Filename:="C:\Propostas\" + titulo + ".xlsx", FileFormat:=xlOpenXMLWorkbook
+        
+        If Dir("C:\Propostas\" + titulo + ".xlsx") = "" Then
+            MsgBox "Arquivo não pode ser salvo. Verifique se o nome da proposta não contém caracteres especiais como  \  /  :  *  ?  <  >  |  ", vbCritical, "Erro"
+        Else
+            If MsgBox("Arquivo salvo com sucesso em:" & vbNewLine & "C:\Propostas\" + titulo + ".xlsx", vbInformation, "Proposta: " + titulo + "") = vbOK Then
+            End If
+        End If
+
+Erro:
+    Resume Next
+    
+
+End Sub
+
+Sub Salvar_PDF()
+
+    
+    On Error GoTo Erro
+    Dim titulo As String
+    Dim linha_inicial, linha_final, linha As Integer
+    linha_inicial = Range("D1").Text
+    linha_final = Range("C1").Text
+    linha = Range("C1").Text
+    titulo = Range("B1").Value
+    
+    If Dir("C:\Propostas") = "" Then
+    MkDir "C:\Propostas"
+    End If
+    
+    If Dir("C:\Propostas\Mercanet") = "" Then
+    MkDir "C:\Propostas\Mercanet"
+    End If
+    
+    Range("H1").Select
+    Sheets("Proposta Padrão").Copy
+    
+    Application.ScreenUpdating = False
+
+'centraliza fonte do código'
+    Range("C9").HorizontalAlignment = xlCenter
+    
+'define célula para não dar erro'
+    Range("H1").Select
+    ActiveSheet.Shapes.Range(Array("addfoto")).Delete
+    ActiveSheet.Shapes.Range(Array("delfoto")).Delete
+    ActiveSheet.Shapes.Range(Array("Mercanet")).Delete
+    ActiveSheet.Shapes.Range(Array("XLSX")).Delete
+    ActiveSheet.Shapes.Range(Array("PDF")).Delete
+    ActiveSheet.Shapes.Range(Array("Pesquisa")).Delete
+    ActiveSheet.Shapes.Range(Array("LimparCodigo")).Delete
+    ActiveSheet.Shapes.Range(Array("Subtotal")).Delete
+    
+    Cells.Copy
+    Cells.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Range("F5").Select
+    Application.CutCopyMode = False
+    
+    
+    Range("s6:v7").Select
+    Selection.Cut
+    Range("x6").Select
+    Application.DisplayAlerts = False
+    ActiveSheet.Paste
+    Application.DisplayAlerts = True
+    Range("H4:I7").Select
+    Selection.Cut
+    Range("s4").Select
+    ActiveSheet.Paste
+    Range("S3").Select
+        
+    Columns("H:P").Hidden = True
+    Columns("R").Hidden = True
+    
+    Columns("S:T").ColumnWidth = 18
+    Columns("C").ColumnWidth = 26
+    Range("X6:AA7").Font.Size = 16
+'    With Selection.Font
+'        .Name = "Calibri"
+'        .Size = 15
+       
+    
+    If linha_inicial + 9 < linha_final Then
+        
+        Rows(9 + linha_inicial + 1 & ":" & linha_final - 1).Delete Shift:=xlUp
+        
+    End If
+    
+        Range("B1").Select
+        
+        Application.ScreenUpdating = True
+        
+        ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:="C:\Propostas\" + titulo + ".pdf", Quality:= _
+        xlQualityStandard, IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=True
+        
+        ActiveWindow.Close SaveChanges:=False
+        
+        If Dir("C:\Propostas\" + titulo + ".pdf") = "" Then
+            MsgBox "Arquivo não pode ser salvo. Verifique se o nome da proposta não contém caracteres especiais como  \  /  :  *  ?  <  >  |  ", vbCritical, "Erro"
+        Else
+            If MsgBox("Arquivo salvo com sucesso em:" & vbNewLine & "C:\Propostas\" + titulo + ".pdf", vbInformation, "Proposta: " + titulo + "") = vbOK Then
+            End If
+        End If
+
+Erro:
+    Resume Next
+
+End Sub
+
+Sub Salvar_CSV()
+
+    On Error GoTo Erro
+    Dim titulo As String
+    Dim linha_inicial, linha_final, linha As Integer
+    linha_inicial = Range("D1").Text
+    linha_final = Range("C1").Text
+    linha = Range("C1").Text
+    titulo = Range("B1").Value
+    
+    If Dir("C:\Propostas") = "" Then
+    MkDir "C:\Propostas"
+    End If
+    
+    If Dir("C:\Propostas\Mercanet") = "" Then
+    MkDir "C:\Propostas\Mercanet"
+    End If
+    
+    
+    Sheets("Notepad").Visible = True
+    Sheets("Notepad").Select
+    Range("A1").Select
+    Range("A1").Select
+    Selection.AutoFill Destination:=Range("A1:A989")
+    Range("A1:A989").Select
+  
+    Open "C:\Propostas\Mercanet\" + titulo + ".csv" For Output As 1
+    For Each ce In Range("a1:a" & Range("a1500").End(xlUp).Row)
+        Print #1, ce
+    Next ce
+    Close #1
+        
+    Sheets("Proposta Padrão").Select
+    Sheets("Notepad").Visible = False
+   
+    If Dir("C:\Propostas\Mercanet\" + titulo + ".csv") = "" Then
+        MsgBox "Arquivo não pode ser salvo. Verifique se o nome da proposta não contém caracteres especiais como  \  /  :  *  ?  <  >  |  ", vbCritical, "Erro"
+    Else
+        If MsgBox("Arquivo salvo com sucesso em:" & vbNewLine & "C:\Propostas\Mercanet\" + titulo + ".csv", vbInformation, "Exportação de Arquivo de Texto") = vbOK Then
+        End If
+    End If
+   
+Erro:
+    Resume Next
+
+End Sub
+
+
